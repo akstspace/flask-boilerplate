@@ -32,7 +32,11 @@ class TestApplicationFactory:
         assert "api_v1" in blueprint_names
 
     def test_error_handlers_registered(self, client):
-        """Test that error handlers are registered"""
+        """
+        Verify that the application's error handlers produce the expected JSON for unknown routes.
+        
+        Asserts that a GET to a non-existent endpoint returns a 404 response whose JSON body contains an "error" key with value "NotFound".
+        """
         # Test 404 handler
         response = client.get("/non-existent-endpoint")
         assert response.status_code == 404

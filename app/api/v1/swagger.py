@@ -26,7 +26,11 @@ api = Api(
 
 
 def init_api_namespaces():
-    """Initialize API namespaces"""
+    """
+    Register and attach v1 API namespaces to the module's Api instance.
+    
+    Specifically makes the authentication namespace available at the '/auth' path (exposed under the blueprint prefix as '/api/v1/auth').
+    """
     from app.api.v1.auth import auth_ns
 
     api.add_namespace(auth_ns, path="/auth")

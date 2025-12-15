@@ -10,7 +10,12 @@ migrate = Migrate()
 
 
 def init_db(app):
-    """Initialize database with app"""
+    """
+    Configure SQLAlchemy, Marshmallow, and Flask-Migrate for the given Flask application.
+    
+    Parameters:
+        app (flask.Flask): The Flask application instance to initialize extensions on. When app.config["TESTING"] is truthy, all database tables are created within the application's context.
+    """
     db.init_app(app)
     ma.init_app(app)
     migrate.init_app(app, db)

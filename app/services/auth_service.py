@@ -14,30 +14,55 @@ class KeycloakAuthService:
     """Handle Keycloak JWT token verification"""
 
     def __init__(self):
+        """
+        Initialize a KeycloakAuthService instance.
+        
+        Sets up internal state, including an internal `_public_key` placeholder used for caching a resolved public key.
+        """
         self._public_key = None
 
     @property
     def keycloak_url(self) -> str:
-        """Get Keycloak server URL"""
+        """
+        Retrieve the configured Keycloak server base URL.
+        
+        Returns:
+            The Keycloak server URL from the application configuration key `KEYCLOAK_SERVER_URL`.
+        """
         return current_app.config["KEYCLOAK_SERVER_URL"]
 
     @property
     def realm(self) -> str:
-        """Get Keycloak realm"""
+        """
+        Keycloak realm name from the Flask application configuration.
+        
+        Returns:
+            str: The realm configured under the `KEYCLOAK_REALM` application setting.
+        """
         return current_app.config["KEYCLOAK_REALM"]
 
     @property
     def certs_url(self) -> str:
-        """Get Keycloak certs endpoint URL"""
+        """
+        Construct the JWKS (JSON Web Key Set) endpoint URL for the configured Keycloak realm.
+        
+        Returns:
+            str: The Keycloak certificates (JWKS) endpoint URL.
+        """
         return f"{self.keycloak_url}/realms/{self.realm}/protocol/openid-connect/certs"
 
     @lru_cache(maxsize=128)
     def _get_jwks(self) -> dict:
         """
-        Fetch and cache JWKS from Keycloak
-
+        Retrieve the JWKS (JSON Web Key Set) from the configured Keycloak server.
+        
+        The fetched JWKS is cached per-process to avoid repeated network requests.
+        
         Returns:
-            Dict: JWKS response
+            dict: Parsed JWKS JSON payload.
+        
+        Raises:
+            AuthenticationError: If the JWKS cannot be fetched or the response cannot be processed.
         """
         try:
             response = requests.get(self.certs_url, timeout=10)
@@ -50,13 +75,13 @@ class KeycloakAuthService:
 
     def _get_public_key_by_kid(self, kid: str) -> str:
         """
-        Get public key matching the key ID (kid) from JWKS
-
-        Args:
-            kid: Key ID from JWT header
-
+        Return the PEM-formatted public key that matches the given key ID (kid) from the JWKS.
+        
+        Parameters:
+            kid (str): Key ID from a JWT header used to locate the corresponding JWK.
+        
         Returns:
-            str: The public key in PEM format
+            str: Public key in PEM format (UTF-8 string).
         """
         jwks = self._get_jwks()
 
@@ -132,13 +157,22 @@ class KeycloakAuthService:
 
     def extract_user_info(self, decoded_token: dict) -> dict:
         """
-        Extract user information from decoded token
-
-        Args:
-            decoded_token: Decoded JWT payload
-
+        Extract a user's profile and role information from a decoded Keycloak JWT payload.
+        
+        Parameters:
+            decoded_token (dict): Decoded JWT payload as returned by JWT decode.
+        
         Returns:
-            Dict: User information
+            dict: A mapping with keys:
+                - user_id: Subject identifier (`sub`).
+                - username: Preferred username (`preferred_username`).
+                - email: Email address (`email`).
+                - email_verified: Boolean indicating if email is verified (`email_verified`, defaults to False).
+                - name: Full name (`name`).
+                - given_name: Given name (`given_name`).
+                - family_name: Family name (`family_name`).
+                - roles: Realm-level roles (from `realm_access.roles`, defaults to []).
+                - client_roles: Client-level roles for the configured Keycloak client (from `resource_access[KEYCLOAK_CLIENT_ID].roles`, defaults to []).
         """
         return {
             "user_id": decoded_token.get("sub"),

@@ -42,7 +42,14 @@ class TestConfig:
         assert config.CELERY_TASK_ALWAYS_EAGER is True
 
     def test_get_config(self):
-        """Test get_config function"""
+        """
+        Verify get_config resolves configuration names to their corresponding config classes and defaults to DevelopmentConfig for unknown names.
+        
+        Checks:
+        - "development" returns a class that is a subclass of BaseConfig.
+        - "testing" returns the TestingConfig class.
+        - an invalid name returns DevelopmentConfig.
+        """
         config = get_config("development")
         assert isinstance(config, type)
         assert issubclass(config, BaseConfig)

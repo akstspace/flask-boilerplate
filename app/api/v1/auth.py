@@ -46,6 +46,13 @@ class CurrentUser(Resource):
     @auth_ns.response(401, "Unauthorized", error_response)
     @require_auth
     def get(self):
-        """Get current authenticated user information"""
+        """
+        Return the authenticated user's information as an API response.
+        
+        Returns:
+            tuple: A pair (payload, status_code) where payload is a dict containing:
+                - 'user': the authenticated user object from Flask's `g.user`
+                - 'status': the string "success"
+            and status_code is the integer 200.
+        """
         return {"user": g.user, "status": "success"}, 200
-
