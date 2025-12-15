@@ -111,7 +111,7 @@ docker-compose down    # Stop services
 
 ## Project Structure
 
-```
+```text
 app/
 ├── api/              # HTTP API endpoints
 │   ├── health.py     # Health check
@@ -138,7 +138,7 @@ docs/                 # Documentation (detailed guides)
 
 ## Key Endpoints
 
-```
+```text
 GET  /health               # Health check
 GET  /api/v1/auth/me       # Current user (requires auth)
 GET  /api/v1/docs            # API documentation (Swagger UI)

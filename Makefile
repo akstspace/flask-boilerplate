@@ -40,17 +40,21 @@ clean:
 	rm -rf .pytest_cache .coverage htmlcov build dist
 
 docker-build:
-	docker-compose build
+	docker compose build
 
 docker-up:
-	docker-compose up -d
+	docker compose up -d
 
 docker-down:
-	docker-compose down
+	docker compose down
 
 lint:
 	flake8 . --exclude=venv,env,.venv,.env,venv*,env*
-	ruff check --fix . 
+	ruff check .
+
+fix:
+	ruff check --fix .
+	black . --exclude '/(venv|env|\.venv|\.env|venv.*|env.*|.*venv|.*env)/'
 
 format:
 	black . --exclude '/(venv|env|\.venv|\.env|venv.*|env.*|.*venv|.*env)/'

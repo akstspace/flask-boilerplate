@@ -2,6 +2,8 @@
 
 from flask import Blueprint, jsonify
 
+from app.core.config import BaseConfig
+
 health_bp = Blueprint("health", __name__)
 
 
@@ -15,8 +17,8 @@ def root_health_check():
         jsonify(
             {
                 "status": "healthy",
-                "service": "Flask Application API",
-                "version": "1.0.0",
+                "service": BaseConfig.APP_NAME,
+                "version": BaseConfig.APP_VERSION,
             }
         ),
         200,

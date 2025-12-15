@@ -139,6 +139,64 @@ LOG_LEVEL=DEBUG
 CORS_ORIGINS=http://localhost:3000,http://localhost:5173
 ```
 
+### 4a. Security: Production Secret Management
+
+⚠️ **IMPORTANT**: The defaults in `docker-compose.yaml` and `.env.example` are for **DEVELOPMENT ONLY**. Never use weak credentials in staging/production.
+
+For production deployments, use a secure secret manager instead of environment files:
+
+#### AWS Secrets Manager
+
+1. Create a secret:
+```bash
+aws secretsmanager create-secret --name flask-app-secrets \
+  --secret-string '{
+    "SECRET_KEY": "your-secure-key",
+    "DB_PASSWORD": "your-secure-password",
+    "KEYCLOAK_CLIENT_SECRET": "your-client-secret"
+  }'
+```
+2. Grant IAM permissions to your ECS/Lambda task role
+3. Update `app/core/config.py` to fetch secrets at startup using boto3
+
+#### HashiCorp Vault
+
+1. Enable KV secrets engine and write your secrets
+2. Configure Vault agent for automatic secret injection
+3. Update app to read from `/var/run/secrets/...` or Vault API
+
+#### Azure Key Vault
+
+1. Create Key Vault: `az keyvault create --resource-group myGroup --name myVault`
+2. Add secrets: `az keyvault secret set --vault-name myVault --name SECRET_KEY --value ...`
+3. Use Managed Identity for authentication
+
+#### Kubernetes Secrets
+
+1. Create secret:
+```bash
+kubectl create secret generic flask-secrets \
+  --from-literal=SECRET_KEY=value \
+  --from-literal=DB_PASSWORD=value
+```
+2. Reference in deployment via `secretKeyRef`
+3. Enable encryption at rest in etcd
+
+#### Docker Secrets (Docker Swarm)
+
+1. Create secrets: `echo "password" | docker secret create db_password -`
+2. Reference in docker-compose.yaml
+3. Read from `/run/secrets/db_password` in Python
+
+**Security Best Practices:**
+- ✅ Generate strong secrets: `python -c "import secrets; print(secrets.token_urlsafe(32))"`
+- ✅ Rotate secrets regularly (API keys: 90 days, passwords: 30 days)
+- ✅ Enable audit logging for secret access
+- ✅ Use different secrets per environment
+- ✅ Never log or print secrets
+- ✅ Use separate service accounts with minimal permissions
+- ✅ Enable encryption at rest and in transit
+
 ### 5. Initialize the Database
 
 Start PostgreSQL (if not running):

@@ -37,6 +37,11 @@ COPY --chown=flaskuser:flaskuser . .
 # Switch to non-root user
 USER flaskuser
 
+# Environment variables
+ENV FLASK_ENV=production \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
 # Expose port
 EXPOSE 8000
 
@@ -46,15 +51,3 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
 
 # Run with gunicorn in production
 CMD ["gunicorn", "-c", "gunicorn_config.py", "run:app"]
-
-
-USER flaskuser
-
-# Expose port
-EXPOSE 5000
-
-ENV FLASK_ENV=production \
-    PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
-
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "--threads", "2", "--timeout", "60", "--access-logfile", "-", "--error-logfile", "-", "run:app"]

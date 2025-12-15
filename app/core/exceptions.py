@@ -8,11 +8,11 @@ class APIException(Exception):
     message = "An error occurred"
 
     def __init__(self, message: str | None = None, status_code: int | None = None):
-        super().__init__()
-        if message:
+        if message is not None:
             self.message = message
-        if status_code:
+        if status_code is not None:
             self.status_code = status_code
+        super().__init__(self.message)
 
     def to_dict(self):
         return {"error": self.__class__.__name__, "message": self.message}

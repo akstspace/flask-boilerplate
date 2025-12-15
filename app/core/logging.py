@@ -13,4 +13,6 @@ class InterceptHandler(logging.Handler):
 
 
 def setup_logging(app: Flask):
-    app.logger.addHandler(InterceptHandler())
+    # Avoid adding multiple InterceptHandler instances if create_app is called multiple times
+    if not any(isinstance(h, InterceptHandler) for h in app.logger.handlers):
+        app.logger.addHandler(InterceptHandler())

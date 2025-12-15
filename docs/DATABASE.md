@@ -159,22 +159,22 @@ db.session.commit()
 
 ```python
 # Get by primary key
-user = User.query.get(1)
+user = db.session.get(User, 1)
 
 # Get by filter
-user = User.query.filter_by(username='john_doe').first()
+user = db.session.query(User).filter_by(username='john_doe').first()
 
 # Get all
-users = User.query.all()
+users = db.session.query(User).all()
 
 # Count
-count = User.query.count()
+count = db.session.query(User).count()
 ```
 
 ### Update (UPDATE)
 
 ```python
-user = User.query.get(1)
+user = db.session.get(User, 1)
 user.email = 'newemail@example.com'
 db.session.commit()
 ```
@@ -222,7 +222,7 @@ except Exception as e:
 
 ```bash
 # Show current database URL
-flask db current
+echo $DATABASE_URL
 
 # Show current revision
 flask db current

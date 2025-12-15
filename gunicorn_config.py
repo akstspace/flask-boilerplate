@@ -1,15 +1,16 @@
 import multiprocessing
+import os
 
 # Server socket
-bind = "0.0.0.0:8000"
-backlog = 2048
+bind = os.getenv("GUNICORN_BIND", "0.0.0.0:8000")
+backlog = int(os.getenv("GUNICORN_BACKLOG", "2048"))
 
 # Worker processes
-workers = multiprocessing.cpu_count() * 2 + 1
+workers = int(os.getenv("GUNICORN_WORKERS", multiprocessing.cpu_count() * 2 + 1))
 worker_class = "sync"
 worker_connections = 1000
-timeout = 30
-keepalive = 2
+timeout = int(os.getenv("GUNICORN_TIMEOUT", "30"))
+keepalive = int(os.getenv("GUNICORN_KEEPALIVE", "2"))
 
 # Process naming
 proc_name = "flask_app"
@@ -23,6 +24,12 @@ access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"
 # Server mechanics
 daemon = False
 pidfile = None
+# Note: user/group/umask are set to None/0 assuming the container/orchestrator
+# enforces a non-root user via Dockerfile USER directive or pod security context.
+# For production hardening, consider:
+# - Running container as non-root user (USER directive in Dockerfile)
+# - Setting umask to 0o022 or 0o027 if file permissions need tightening
+# - Using pod security policies/contexts in Kubernetes for additional enforcement
 umask = 0
 user = None
 group = None
