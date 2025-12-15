@@ -1,0 +1,54 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+
+    volumes:
+      - ../..:/workspaces:cached
+
+    command: sleep infinity
+    networks:
+      - devcontainer-network
+    ports:
+      - "8000:8000"
+
+  db:
+    image: postgres:18.1-alpine
+    restart: unless-stopped
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres
+    networks:
+      - devcontainer-network
+      
+  redis:
+    image: redis:8.4.0-alpine
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - devcontainer-network
+    
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4.7
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin 
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    command: start-dev
+    networks:
+      - devcontainer-network
+    ports:
+      - "8080:8080"
+      
+networks:
+  devcontainer-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  redis-data:
