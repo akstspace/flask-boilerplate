@@ -30,11 +30,10 @@ def create_app(config_name="development"):
 
     logger.info(f"Starting application with {config_name} configuration")
 
+    from app import models  # noqa: F401
+
     # Initialize database
     init_db(app)
-
-    # Import models to register them with SQLAlchemy
-    from app import models # noqa: F401
 
     # Register error handlers
     register_error_handlers(app)

@@ -4,7 +4,7 @@ The Flask boilerplate uses **Flask-RESTX** for API development and Swagger/OpenA
 
 ## API Structure
 
-```
+```text
 app/api/
 ├── health.py          # Health check endpoint
 └── v1/
@@ -112,7 +112,7 @@ In `app/api/v1/swagger.py`, add your namespace to `init_api_namespaces()`:
 ```python
 def init_api_namespaces():
     from app.api.v1.users import users_ns
-    api.add_namespace(users_ns, path='/api/v1/users')
+    api.add_namespace(users_ns, path='/users')
 ```
 
 ### 3. Register Blueprint in App Factory
@@ -163,8 +163,8 @@ JWT_VERIFY_SIGNATURE=True
 
 Visit the interactive API documentation at:
 
-```
-http://localhost:8000/api/v1/
+```text
+http://localhost:8000/api/v1/docs
 ```
 
 This shows all endpoints, request/response schemas, and allows testing directly from the browser.
