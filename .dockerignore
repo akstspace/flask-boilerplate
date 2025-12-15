@@ -31,3 +31,4 @@ Makefile
 docker-compose.yaml
 .dockerignore
 tests
+docs/
