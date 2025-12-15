@@ -26,7 +26,11 @@ api = Api(
 
 
 def init_api_namespaces():
-    """Initialize API namespaces"""
+    """
+    Register API namespaces required by the application.
+    
+    Specifically imports and registers the authentication namespace so it is available at the '/auth' path.
+    """
     from app.api.v1.auth import auth_ns
 
     api.add_namespace(auth_ns, path="/auth")

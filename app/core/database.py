@@ -10,7 +10,14 @@ migrate = Migrate()
 
 
 def init_db(app):
-    """Initialize database with app"""
+    """
+    Initialize and register database-related extensions on the given Flask application.
+    
+    When app.config["TESTING"] is truthy, create all database tables within the application's context.
+    
+    Parameters:
+        app (flask.Flask): The Flask application to configure.
+    """
     db.init_app(app)
     ma.init_app(app)
     migrate.init_app(app, db)

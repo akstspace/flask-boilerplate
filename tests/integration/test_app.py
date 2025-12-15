@@ -13,7 +13,11 @@ class TestApplicationFactory:
         assert app.config["TESTING"] is False
 
     def test_create_app_testing(self):
-        """Test creating app with testing config"""
+        """
+        Verify that the application factory returns an app configured for testing.
+        
+        Asserts that the app's TESTING config is True and that the SQLALCHEMY_DATABASE_URI contains "sqlite".
+        """
         app = create_app("testing")
         assert app.config["TESTING"] is True
         assert "sqlite" in app.config["SQLALCHEMY_DATABASE_URI"]

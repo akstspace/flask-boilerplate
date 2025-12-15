@@ -16,6 +16,12 @@ logger = logging.getLogger("alembic.env")
 
 
 def get_engine():
+    """
+    Retrieve the SQLAlchemy Engine used by Flask-Migrate.
+    
+    Returns:
+        engine: The SQLAlchemy Engine instance used by the Flask application's migration extension. Supports engines exposed via either `db.get_engine()` (Flask-SQLAlchemy < 3 / Alchemical) or `db.engine` (Flask-SQLAlchemy >= 3).
+    """
     try:
         # this works with Flask-SQLAlchemy<3 and Alchemical
         return current_app.extensions["migrate"].db.get_engine()
@@ -25,6 +31,12 @@ def get_engine():
 
 
 def get_engine_url():
+    """
+    Retrieve the database URL for the current Flask-Migrate engine with percent signs escaped.
+    
+    Returns:
+        db_url (str): The engine's database URL including any password, with '%' characters escaped as '%%'.
+    """
     try:
         return get_engine().url.render_as_string(hide_password=False).replace("%", "%%")
     except AttributeError:
@@ -45,6 +57,14 @@ target_db = current_app.extensions["migrate"].db
 
 
 def get_metadata():
+    """
+    Return the MetaData object to use as Alembic's target metadata for autogeneration.
+    
+    When the Flask-Migrate `db` exposes multiple metadatas, selects the default metadata mapped to `None`; otherwise returns the `db.metadata` attribute.
+    
+    Returns:
+        sqlalchemy.MetaData: The MetaData instance used for autogenerate and migration operations.
+    """
     if hasattr(target_db, "metadatas"):
         return target_db.metadatas[None]
     return target_db.metadata
@@ -70,17 +90,26 @@ def run_migrations_offline():
 
 
 def run_migrations_online():
-    """Run migrations in 'online' mode.
-
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
-
+    """
+    Configure Alembic to run migrations against a live database connection and execute them within a transaction.
+    
+    Configures a connectable engine and binds a connection to the Alembic context using the module's target metadata and Flask-Migrate configuration. If autogeneration is enabled, registers a directive that suppresses creating an empty revision and logs when no schema changes are detected. Runs migrations inside a transactional context.
     """
 
     # this callback is used to prevent an auto-migration from being generated
     # when there are no changes to the schema
     # reference: http://alembic.zzzcomputing.com/en/latest/cookbook.html
     def process_revision_directives(context, revision, directives):
+        """
+        Suppress generation of an empty autogenerate migration and log when no schema changes are detected.
+        
+        If Alembic's autogenerate option is enabled and the computed upgrade operations are empty, this function clears the `directives` list (preventing a new empty revision from being produced) and logs an informational message.
+        
+        Parameters:
+            context: The Alembic MigrationContext for the current run.
+            revision: The current revision identifier or directive object provided by Alembic.
+            directives (list): The list of pending revision directives; this function may modify this list in-place.
+        """
         if getattr(config.cmd_opts, "autogenerate", False):
             script = directives[0]
             if script.upgrade_ops.is_empty():

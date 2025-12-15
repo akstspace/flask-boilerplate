@@ -14,30 +14,53 @@ class KeycloakAuthService:
     """Handle Keycloak JWT token verification"""
 
     def __init__(self):
+        """
+        Initialize the KeycloakAuthService instance.
+        
+        Sets an internal attribute used to cache the currently loaded public key; initially None.
+        """
         self._public_key = None
 
     @property
     def keycloak_url(self) -> str:
-        """Get Keycloak server URL"""
+        """
+        Return the configured Keycloak server base URL.
+        
+        Returns:
+            The Keycloak server base URL from the application's configuration.
+        """
         return current_app.config["KEYCLOAK_SERVER_URL"]
 
     @property
     def realm(self) -> str:
-        """Get Keycloak realm"""
+        """
+        Keycloak realm configured for the application.
+        
+        Returns:
+            realm (str): The Keycloak realm name from application configuration.
+        """
         return current_app.config["KEYCLOAK_REALM"]
 
     @property
     def certs_url(self) -> str:
-        """Get Keycloak certs endpoint URL"""
+        """
+        Constructs the JWKS (certificates) endpoint URL for the configured Keycloak realm.
+        
+        Returns:
+            str: The full URL of the realm's OpenID Connect JWKS (certs) endpoint.
+        """
         return f"{self.keycloak_url}/realms/{self.realm}/protocol/openid-connect/certs"
 
     @lru_cache(maxsize=128)
     def _get_jwks(self) -> dict:
         """
-        Fetch and cache JWKS from Keycloak
-
+        Retrieve the JSON Web Key Set (JWKS) from Keycloak and return it as a parsed dictionary. The fetched result is cached.
+        
         Returns:
-            Dict: JWKS response
+            dict: The JWKS payload parsed from JSON.
+        
+        Raises:
+            AuthenticationError: If the JWKS cannot be fetched or parsed.
         """
         try:
             response = requests.get(self.certs_url, timeout=10)
@@ -50,13 +73,16 @@ class KeycloakAuthService:
 
     def _get_public_key_by_kid(self, kid: str) -> str:
         """
-        Get public key matching the key ID (kid) from JWKS
-
-        Args:
-            kid: Key ID from JWT header
-
+        Retrieve the PEM-formatted public key from the JWKS that matches the given JWT `kid`.
+        
+        Parameters:
+            kid (str): Key ID from the JWT header to search for in the JWKS.
+        
         Returns:
-            str: The public key in PEM format
+            str: Public key in PEM format.
+        
+        Raises:
+            ValueError: If the JWKS payload does not contain a `keys` field or no key with the given `kid` is found.
         """
         jwks = self._get_jwks()
 
@@ -78,16 +104,13 @@ class KeycloakAuthService:
 
     def verify_token(self, token: str) -> dict | None:
         """
-        Verify JWT token from Keycloak
-
-        Args:
-            token: JWT token string
-
+        Verify a Keycloak-issued JWT and return its decoded payload.
+        
         Returns:
-            Dict: Decoded token payload if valid
-
+            Decoded token payload as a dict.
+        
         Raises:
-            AuthenticationError: If token is invalid
+            AuthenticationError: If the token is missing the `kid` header, has expired, is invalid, or fails verification for any other reason.
         """
         try:
             unverified_header = jwt.get_unverified_header(token)
@@ -132,13 +155,22 @@ class KeycloakAuthService:
 
     def extract_user_info(self, decoded_token: dict) -> dict:
         """
-        Extract user information from decoded token
-
-        Args:
-            decoded_token: Decoded JWT payload
-
+        Builds a normalized user info dictionary from a decoded Keycloak JWT payload.
+        
+        Parameters:
+            decoded_token (dict): Decoded JWT payload containing Keycloak claims.
+        
         Returns:
-            Dict: User information
+            dict: A mapping with the following keys:
+                - user_id: Subject identifier from the `sub` claim.
+                - username: Username from the `preferred_username` claim.
+                - email: Email address from the `email` claim.
+                - email_verified: Boolean indicating whether the email is verified.
+                - name: Full name from the `name` claim.
+                - given_name: Given (first) name from the `given_name` claim.
+                - family_name: Family (last) name from the `family_name` claim.
+                - roles: List of realm-level roles from `realm_access.roles`.
+                - client_roles: List of client-level roles for the configured client from `resource_access[KEYCLOAK_CLIENT_ID].roles`.
         """
         return {
             "user_id": decoded_token.get("sub"),

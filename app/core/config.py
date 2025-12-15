@@ -87,6 +87,15 @@ class ProductionConfig(BaseConfig):
     # Ensure secret key is set in production
     @property
     def SECRET_KEY(self) -> str:
+        """
+        Retrieve the application's SECRET_KEY from the environment and enforce that a non-default value is set for production.
+        
+        Returns:
+            The SECRET_KEY string from the environment.
+        
+        Raises:
+            ValueError: If SECRET_KEY is not set or equals the default development value "dev-secret-key-change-in-production".
+        """
         secret = os.getenv("SECRET_KEY")
         if not secret or secret == "dev-secret-key-change-in-production":
             msg = "SECRET_KEY must be set in production"
@@ -114,7 +123,15 @@ config_by_name = {
 
 
 def get_config(config_name: str | None = None) -> BaseConfig:
-    """Get configuration by name"""
+    """
+    Selects the application configuration class for the given environment name.
+    
+    Parameters:
+        config_name (str | None): Environment name to select the configuration. If None, reads FLASK_ENV from the environment and uses "development" when FLASK_ENV is not set.
+    
+    Returns:
+        The configuration class corresponding to the provided environment name; defaults to DevelopmentConfig if no matching configuration is found.
+    """
     if config_name is None:
         config_name = os.getenv("FLASK_ENV", "development")
     return config_by_name.get(config_name, DevelopmentConfig)

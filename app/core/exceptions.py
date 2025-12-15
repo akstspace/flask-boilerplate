@@ -8,6 +8,13 @@ class APIException(Exception):
     message = "An error occurred"
 
     def __init__(self, message: str | None = None, status_code: int | None = None):
+        """
+        Initialize the APIException, optionally overriding its default message and HTTP status code.
+        
+        Parameters:
+            message (str | None): If provided, sets the exception's message instead of the class default.
+            status_code (int | None): If provided, sets the exception's HTTP status code instead of the class default.
+        """
         super().__init__()
         if message:
             self.message = message
@@ -15,6 +22,14 @@ class APIException(Exception):
             self.status_code = status_code
 
     def to_dict(self):
+        """
+        Serialize the exception into a dictionary suitable for API responses.
+        
+        The returned dictionary contains two keys: "error" (the exception class name) and "message" (the instance's message).
+        
+        Returns:
+            dict: A mapping with "error" set to the exception class name and "message" set to the exception's message.
+        """
         return {"error": self.__class__.__name__, "message": self.message}
 
 

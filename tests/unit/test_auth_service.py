@@ -14,7 +14,15 @@ class TestKeycloakAuthService:
 
     @pytest.fixture
     def auth_service(self, app):
-        """Create auth service instance"""
+        """
+        Create a KeycloakAuthService instance within the application's context.
+        
+        Parameters:
+            app (Flask): The Flask application whose application context will be used.
+        
+        Returns:
+            KeycloakAuthService: A new KeycloakAuthService instance.
+        """
         with app.app_context():
             return KeycloakAuthService()
 

@@ -11,13 +11,13 @@ from app.core.logging import setup_logging
 
 def create_app(config_name="development"):
     """
-    Application factory pattern
-
-    Args:
-        config_name: Configuration name (development, production, testing)
-
+    Create and configure the Flask application.
+    
+    Parameters:
+        config_name (str): Configuration name, e.g. "development", "production", or "testing".
+    
     Returns:
-        Flask application instance
+        Flask: Configured Flask application instance.
     """
     app = Flask(__name__)
 
@@ -46,18 +46,43 @@ def create_app(config_name="development"):
 
 
 def register_error_handlers(app: Flask):
-    """Register error handlers"""
+    """
+    Register centralized JSON error handlers on the given Flask application.
+    
+    Registers handlers for:
+    - APIException: returns the exception's dictionary payload as JSON with the exception's status code.
+    - 404 Not Found: returns JSON {"error": "NotFound", "message": "The requested resource was not found"} with status 404.
+    - 500 Internal Server Error: logs the error and returns JSON {"error": "InternalServerError", "message": "An internal error occurred"} with status 500.
+    """
 
     @app.errorhandler(APIException)
     def handle_api_exception(error):
-        """Handle custom API exceptions"""
+        """
+        Convert a custom API exception into a JSON HTTP response.
+        
+        Parameters:
+            error (APIException): Exception object exposing `to_dict()` for the response body and `status_code` for the HTTP status.
+        
+        Returns:
+            flask.wrappers.Response: JSON response with the exception data and the exception's HTTP status code.
+        """
         response = jsonify(error.to_dict())
         response.status_code = error.status_code
         return response
 
     @app.errorhandler(404)
     def handle_not_found(error):
-        """Handle 404 errors"""
+        """
+        Return a JSON response for HTTP 404 Not Found errors.
+        
+        Parameters:
+            error: The caught 404 exception provided by Flask's error handling.
+        
+        Returns:
+            A tuple of (JSON response body, int) where the body is
+            {"error": "NotFound", "message": "The requested resource was not found"}
+            and the status code is 404.
+        """
         return (
             jsonify(
                 {"error": "NotFound", "message": "The requested resource was not found"}
@@ -67,7 +92,16 @@ def register_error_handlers(app: Flask):
 
     @app.errorhandler(500)
     def handle_internal_error(error):
-        """Handle 500 errors"""
+        """
+        Return a standardized JSON response for internal server errors.
+        
+        Parameters:
+            error: The exception or error instance that triggered the handler.
+        
+        Returns:
+            A tuple of (JSON response, int) where the JSON body contains
+            {"error": "InternalServerError", "message": "An internal error occurred"} and the status code is 500.
+        """
         logger.error(f"Internal error: {error!s}")
         return (
             jsonify(
@@ -81,7 +115,11 @@ def register_error_handlers(app: Flask):
 
 
 def register_blueprints(app: Flask):
-    """Register application blueprints"""
+    """
+    Register application blueprints and initialize API namespaces.
+    
+    Registers the health-check blueprint and the API v1 blueprint after calling init_api_namespaces() to set up its namespaces.
+    """
 
     # Register health check
     from app.api.health import health_bp

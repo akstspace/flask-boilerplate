@@ -10,10 +10,10 @@ from app.services.auth_service import auth_service
 
 def extract_token_from_header():
     """
-    Extract JWT token from Authorization header
-
+    Retrieve the Bearer JWT token from the Authorization header.
+    
     Returns:
-        str: Token string or None
+        The token string if the Authorization header is present and formatted as 'Bearer <token>', `None` otherwise.
     """
     auth_header = request.headers.get("Authorization", "")
 
@@ -31,18 +31,28 @@ def extract_token_from_header():
 
 def require_auth(f):
     """
-    Decorator to require valid JWT authentication
-
-    Usage:
-        @app.route('/protected')
-        @require_auth
-        def protected_route():
-            user = g.user
-            return {'message': f'Hello {user["username"]}'}
+    Require that the request contains a valid Bearer JWT and populate Flask `g` with user and token for the wrapped view.
+    
+    If a valid Bearer token is present in the Authorization header, verifies the token and sets `g.user` to the extracted user information and `g.token` to the decoded token before invoking the wrapped function.
+    
+    Returns:
+        function: The wrapped view function that enforces authentication and sets request context.
+    
+    Raises:
+        AuthenticationError: If no token is provided or token verification fails.
     """
 
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        """
+        Enforces presence of a valid Bearer JWT, populates Flask `g.user` and `g.token`, then invokes the wrapped function.
+        
+        Raises:
+        	AuthenticationError: If no token is provided or token verification fails.
+        
+        Returns:
+        	The return value of the wrapped function.
+        """
         token = extract_token_from_header()
 
         if not token:
@@ -66,17 +76,30 @@ def require_auth(f):
 
 def require_role(*required_roles):
     """
-    Decorator to require specific roles
-
-    Usage:
-        @app.route('/admin')
-        @require_auth
-        @require_role('admin', 'superuser')
-        def admin_route():
-            return {'message': 'Admin access'}
+    Enforces that the authenticated user has at least one of the specified roles.
+    
+    Parameters:
+        *required_roles (str): One or more role names; the user must have at least one to proceed.
+    
+    Returns:
+        function: A decorator that wraps a view and performs the role check.
+    
+    Raises:
+        AuthorizationError: If there is no authenticated user or the user lacks any of the required roles.
     """
 
     def decorator(f):
+        """
+        Enforces that the current request's authenticated user has at least one of the required roles.
+        
+        The decorated function checks Flask's `g.user` for roles (including `client_roles`) and raises AuthorizationError if no user is authenticated or if none of the required roles are present. If the check passes, the original function is invoked.
+        
+        Returns:
+            function: A wrapper that performs the role check before calling the original function.
+        
+        Raises:
+            AuthorizationError: If authentication is missing or the user lacks all required roles.
+        """
         @wraps(f)
         def decorated_function(*args, **kwargs):
             user = getattr(g, "user", None)
@@ -105,20 +128,24 @@ def require_role(*required_roles):
 
 def optional_auth(f):
     """
-    Decorator for optional authentication
-    Sets g.user if token is valid, otherwise continues without authentication
-
-    Usage:
-        @app.route('/public')
-        @optional_auth
-        def public_route():
-            if hasattr(g, 'user'):
-                return {'message': f'Hello {g.user["username"]}'}
-            return {'message': 'Hello anonymous'}
+    Allow a route to accept requests with or without valid authentication and populate g.user when a valid token is provided.
+    
+    If an Authorization Bearer token is present and valid, verifies the token and sets g.user and g.token for the request. Authentication errors are ignored so the route proceeds unauthenticated when no token or an invalid token is provided.
+    
+    Returns:
+        The wrapped function that applies optional authentication to the original route.
     """
 
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        """
+        Attempt optional authentication by extracting and verifying a Bearer token from the Authorization header; if verification succeeds, populate `g.user` and `g.token` before invoking the wrapped function.
+        
+        If no token is present or token verification fails with an AuthenticationError, the request proceeds without authentication context.
+        
+        Returns:
+            The return value of the wrapped function.
+        """
         try:
             token = extract_token_from_header()
 

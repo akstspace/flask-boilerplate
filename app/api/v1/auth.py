@@ -46,6 +46,10 @@ class CurrentUser(Resource):
     @auth_ns.response(401, "Unauthorized", error_response)
     @require_auth
     def get(self):
-        """Get current authenticated user information"""
+        """
+        Return information about the currently authenticated user.
+        
+        Returns:
+            tuple: A pair of (response_body, status_code) where `response_body` is a dict containing `user` set to the authenticated user object and `status` set to "success", and `status_code` is 200.
+        """
         return {"user": g.user, "status": "success"}, 200
-
