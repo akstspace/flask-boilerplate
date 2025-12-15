@@ -41,7 +41,9 @@ class TestExceptions:
         assert error.message == "Insufficient permissions"
 
     def test_validation_error(self):
-        """Test ValidationError"""
+        """
+        Verify that ValidationError has a default status_code of 400 and a default message of "Validation failed".
+        """
         error = ValidationError()
         assert error.status_code == 400
         assert error.message == "Validation failed"

@@ -7,7 +7,11 @@ class TestAuthEndpoints:
     """Test authentication endpoints"""
 
     def test_auth_me_without_token(self, client):
-        """Test /api/v1/auth/me without token"""
+        """
+        Verify GET /api/v1/auth/me returns 401 when no Authorization token is provided.
+        
+        Asserts the response status code is 401 and the JSON body contains the keys "error" and "message".
+        """
         response = client.get("/api/v1/auth/me")
 
         assert response.status_code == 401
@@ -25,9 +29,9 @@ class TestAuthEndpoints:
         data = response.get_json()
         assert "error" in data
 
-    @patch("app.core.middleware.auth_service.extract_user_info")
-    @patch("app.core.middleware.auth_service.verify_token")
-    def test_auth_me_with_valid_token(self, mock_verify, mock_extract, client):
+    @patch("app.services.auth_service.auth_service.verify_token")
+    @patch("app.services.auth_service.auth_service.extract_user_info")
+    def test_auth_me_with_valid_token(self, mock_extract, mock_verify, client):
         """Test /api/v1/auth/me with valid token"""
         # Mock token verification
         mock_verify.return_value = {"sub": "123", "preferred_username": "testuser"}

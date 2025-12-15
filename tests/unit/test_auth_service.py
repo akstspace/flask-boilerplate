@@ -14,13 +14,23 @@ class TestKeycloakAuthService:
 
     @pytest.fixture
     def auth_service(self, app):
-        """Create auth service instance"""
+        """
+        Provide a KeycloakAuthService instance created inside the application's context.
+        
+        Returns:
+            KeycloakAuthService: An auth service instance initialized while the Flask app context is active.
+        """
         with app.app_context():
             return KeycloakAuthService()
 
     @pytest.fixture
     def mock_jwks(self):
-        """Mock JWKS response"""
+        """
+        Provide a sample JSON Web Key Set (JWKS) dictionary for tests.
+        
+        Returns:
+            dict: JWKS containing a single RSA public key with keys `kid`, `kty`, `alg`, `use`, `n`, and `e`.
+        """
         return {
             "keys": [
                 {

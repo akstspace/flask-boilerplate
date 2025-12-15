@@ -8,7 +8,16 @@ class TestCeleryConfig:
 
     @patch("app.celery.celery_config.config_by_name")
     def test_make_celery(self, mock_config):
-        """Test make_celery function"""
+        """
+        Verify that make_celery returns a Celery application configured for the Flask application.
+        
+        Sets up a mocked configuration mapping with typical Celery settings, calls make_celery("development"),
+        and asserts the created Celery app is not None and its main module is "flask_app".
+        
+        Parameters:
+            mock_config: A patched configuration mapping whose __getitem__ returns a mock configuration object
+                         with Celery-related attributes used by make_celery.
+        """
         from app.celery.celery_config import make_celery
 
         # Mock config

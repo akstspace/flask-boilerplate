@@ -81,6 +81,12 @@ class TestRequireAuth:
 
         @require_auth
         def protected_view():
+            """
+            Return a mapping containing the current request's user.
+            
+            Returns:
+                dict: A dictionary with the key 'user' set to the value of `g.user`.
+            """
             return {"user": g.user}
 
         with app.test_request_context(
@@ -97,6 +103,12 @@ class TestRequireAuth:
 
         @require_auth
         def protected_view():
+            """
+            Return a simple success payload.
+            
+            Returns:
+                dict: A dictionary with key "message" and value "success".
+            """
             return {"message": "success"}
 
         with app.test_request_context():
@@ -113,6 +125,12 @@ class TestRequireAuth:
 
         @require_auth
         def protected_view():
+            """
+            Return a simple success payload.
+            
+            Returns:
+                dict: A dictionary with key "message" and value "success".
+            """
             return {"message": "success"}
 
         with app.test_request_context(
@@ -127,6 +145,12 @@ class TestRequireAuth:
 
         @require_auth
         def protected_view():
+            """
+            Return a simple success payload.
+            
+            Returns:
+                dict: A dictionary with key "message" and value "success".
+            """
             return {"message": "success"}
 
         with app.test_request_context(
@@ -144,7 +168,12 @@ class TestRequireAuth:
 
         @require_auth
         def my_protected_view():
-            """My docstring"""
+            """
+            Simple protected endpoint used in tests that returns a success message.
+            
+            Returns:
+                dict: JSON-serializable mapping with key "message" set to "success".
+            """
             return {"message": "success"}
 
         assert my_protected_view.__name__ == "my_protected_view"
@@ -159,6 +188,12 @@ class TestRequireRole:
 
         @require_role("admin")
         def admin_view():
+            """
+            Return a simple admin access response.
+            
+            Returns:
+                dict: A dictionary containing the key "message" with value "admin access".
+            """
             return {"message": "admin access"}
 
         with app.test_request_context():
@@ -175,6 +210,12 @@ class TestRequireRole:
 
         @require_role("admin", "superuser", "moderator")
         def admin_view():
+            """
+            Return a simple admin access response.
+            
+            Returns:
+                dict: A dictionary containing the key "message" with value "admin access".
+            """
             return {"message": "admin access"}
 
         with app.test_request_context():
@@ -191,6 +232,12 @@ class TestRequireRole:
 
         @require_role("app-admin")
         def admin_view():
+            """
+            Return a simple admin access response.
+            
+            Returns:
+                dict: A dictionary containing the key "message" with value "admin access".
+            """
             return {"message": "admin access"}
 
         with app.test_request_context():
@@ -207,6 +254,12 @@ class TestRequireRole:
 
         @require_role("admin")
         def admin_view():
+            """
+            Return a simple admin access response.
+            
+            Returns:
+                dict: A dictionary containing the key "message" with value "admin access".
+            """
             return {"message": "admin access"}
 
         with app.test_request_context():
@@ -219,6 +272,12 @@ class TestRequireRole:
 
         @require_role("admin", "superuser")
         def admin_view():
+            """
+            Return a simple admin access response.
+            
+            Returns:
+                dict: A dictionary containing the key "message" with value "admin access".
+            """
             return {"message": "admin access"}
 
         with app.test_request_context():
@@ -236,6 +295,12 @@ class TestRequireRole:
 
         @require_role("admin")
         def admin_view():
+            """
+            Return a simple admin access response.
+            
+            Returns:
+                dict: A dictionary containing the key "message" with value "admin access".
+            """
             return {"message": "admin access"}
 
         with app.test_request_context():
@@ -248,7 +313,12 @@ class TestRequireRole:
 
         @require_role("admin")
         def my_admin_view():
-            """My admin docstring"""
+            """
+            Return a success message for the admin view.
+            
+            Returns:
+                dict: A dictionary with the key "message" whose value is "success".
+            """
             return {"message": "success"}
 
         assert my_admin_view.__name__ == "my_admin_view"
@@ -268,6 +338,12 @@ class TestOptionalAuth:
 
         @optional_auth
         def public_view():
+            """
+            Return the authentication status and current user if available.
+            
+            Returns:
+                dict: A mapping with "authenticated": True and "user" set to the Flask `g.user` object when a user is present on `g`; otherwise {"authenticated": False}.
+            """
             if hasattr(g, "user"):
                 return {"authenticated": True, "user": g.user}
             return {"authenticated": False}
@@ -282,10 +358,18 @@ class TestOptionalAuth:
             assert g.token == mock_decoded
 
     def test_optional_auth_without_token(self, app):
-        """Test optional auth without token"""
+        """
+        Verify that a view decorated with `optional_auth` remains unauthenticated and does not set `g.user` when no Authorization token is provided.
+        """
 
         @optional_auth
         def public_view():
+            """
+            Return the authentication status and current user if available.
+            
+            Returns:
+                dict: A mapping with "authenticated": True and "user" set to the Flask `g.user` object when a user is present on `g`; otherwise {"authenticated": False}.
+            """
             if hasattr(g, "user"):
                 return {"authenticated": True, "user": g.user}
             return {"authenticated": False}
@@ -304,6 +388,12 @@ class TestOptionalAuth:
 
         @optional_auth
         def public_view():
+            """
+            Report whether the current request has an authenticated user.
+            
+            Returns:
+                dict: `{'authenticated': True}` if `g.user` is present, `{'authenticated': False}` otherwise.
+            """
             if hasattr(g, "user"):
                 return {"authenticated": True}
             return {"authenticated": False}
@@ -322,6 +412,12 @@ class TestOptionalAuth:
 
         @optional_auth
         def public_view():
+            """
+            Report whether the current request has an authenticated user.
+            
+            Returns:
+                dict: `{'authenticated': True}` if `g.user` is present, `{'authenticated': False}` otherwise.
+            """
             if hasattr(g, "user"):
                 return {"authenticated": True}
             return {"authenticated": False}
@@ -339,7 +435,12 @@ class TestOptionalAuth:
 
         @optional_auth
         def my_public_view():
-            """My public docstring"""
+            """
+            Provide a public view response containing a success message.
+            
+            Returns:
+                dict: A dictionary with the key 'message' set to 'success'.
+            """
             return {"message": "success"}
 
         assert my_public_view.__name__ == "my_public_view"
