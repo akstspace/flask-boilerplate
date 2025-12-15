@@ -15,7 +15,6 @@ A lightweight Flask application boilerplate with support for structured app layo
 - **[Database Guide](docs/DATABASE.md)** - SQLAlchemy, Flask-Migrate, models
 - **[Celery Guide](docs/CELERY.md)** - Background tasks, Redis, task monitoring
 - **[Testing Guide](docs/TESTING.md)** - pytest, fixtures, unit & integration tests
-- **[Deployment Guide](docs/DEPLOYMENT.md)** - Production setup, Gunicorn, Nginx, Docker
 
 ## Key Features
 
