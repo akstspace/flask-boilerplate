@@ -47,16 +47,25 @@ class BaseConfig:
     CELERY_ENABLE_UTC = True
 
     # Keycloak JWT Configuration
-    KEYCLOAK_SERVER_URL = os.getenv("KEYCLOAK_SERVER_URL", "http://localhost:8080")
-    KEYCLOAK_REALM = os.getenv("KEYCLOAK_REALM", "master")
-    KEYCLOAK_CLIENT_ID = os.getenv("KEYCLOAK_CLIENT_ID", "flask-app")
-    KEYCLOAK_CLIENT_SECRET = os.getenv("KEYCLOAK_CLIENT_SECRET", "")
+    KEYCLOAK_SERVER_URL = os.getenv("KEYCLOAK_SERVER_URL")
+    KEYCLOAK_REALM = os.getenv("KEYCLOAK_REALM")
+    KEYCLOAK_CLIENT_ID = os.getenv("KEYCLOAK_CLIENT_ID")
+    KEYCLOAK_CLIENT_SECRET = os.getenv("KEYCLOAK_CLIENT_SECRET")
 
     # JWT Configuration
     JWT_ALGORITHM = "RS256"
     JWT_VERIFY_EXPIRATION = True
     JWT_VERIFY_SIGNATURE = True
     JWT_LEEWAY = 0
+
+    # Auth Provider Selection ("keycloak" or "jwks")
+    AUTH_PROVIDER = os.getenv("AUTH_PROVIDER", "keycloak")
+
+    # JWKS Auth Configuration (used when AUTH_PROVIDER=jwks)
+    JWKS_URL = os.getenv("JWKS_URL")
+    JWKS_ISSUER = os.getenv("JWKS_ISSUER")
+    JWKS_AUDIENCE = os.getenv("JWKS_AUDIENCE")
+    JWKS_ALGORITHMS = os.getenv("JWKS_ALGORITHMS", "EdDSA,RS256")
 
     # CORS
     CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*").split(",")

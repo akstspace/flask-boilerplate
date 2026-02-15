@@ -33,6 +33,11 @@ def create_app(config_name="development"):
     # Initialize database
     init_db(app)
 
+    # Initialize auth service (cached for request lifetime)
+    from app.services.auth_service import init_auth_service
+
+    init_auth_service(app)
+
     # Import models to register them with SQLAlchemy
     from app import models # noqa: F401
 
