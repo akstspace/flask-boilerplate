@@ -5,7 +5,7 @@ from functools import wraps
 from flask import g, request
 
 from app.core.exceptions import AuthenticationError, AuthorizationError
-from app.services.auth_service import auth_service
+from app.services.auth_service import get_auth_service
 
 
 def extract_token_from_header():
@@ -62,8 +62,9 @@ def require_auth(f):
             raise AuthenticationError(msg)
 
         try:
-            decoded_token = auth_service.verify_token(token)
-            g.user = auth_service.extract_user_info(decoded_token)
+            service = get_auth_service()
+            decoded_token = service.verify_token(token)
+            g.user = service.extract_user_info(decoded_token)
             g.token = decoded_token
         except AuthenticationError:
             raise
@@ -155,8 +156,9 @@ def optional_auth(f):
             token = extract_token_from_header()
 
             if token:
-                decoded_token = auth_service.verify_token(token)
-                g.user = auth_service.extract_user_info(decoded_token)
+                service = get_auth_service()
+                decoded_token = service.verify_token(token)
+                g.user = service.extract_user_info(decoded_token)
                 g.token = decoded_token
         except AuthenticationError:
             # Ignore authentication errors for optional auth
